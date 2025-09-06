@@ -1,0 +1,72 @@
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  password     String
+  firstName    String?
+  lastName     String?
+  image        String?       
+  color        Int?            
+  profileSetup Boolean  @default(false) 
+
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+  channels       Channel[] @relation("ChannelMembers")
+  adminChannels  Channel[] @relation("ChannelAdmin")
+
+ 
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  senderId    String
+  recipientId String?       
+
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id])
+  recipient   User?    @relation("ReceivedMessages", fields: [recipientId], references: [id])
+
+  messageType MessageType
+  content     String?   
+  fileUrl     String?   
+
+  timestamp   DateTime @default(now())
+  channelId   String?
+  channel   Channel? @relation("ChannelMessages", fields: [channelId], references: [id])
+}
+
+
+enum MessageType {
+  text
+  file
+}
+
+model Channel {
+  id        String    @id @default(cuid())
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+
+  members   User[]     @relation("ChannelMembers")
+  adminId   String
+  admin     User       @relation("ChannelAdmin", fields: [adminId], references: [id] , onDelete: Cascade)
+  messages  Message[]  @relation("ChannelMessages")
+}
+
+
+
+
