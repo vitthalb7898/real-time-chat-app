@@ -73,7 +73,6 @@ export const chatSlice = createSlice({
         addContactsInDMList: (  state, action) => {
             const message = action.payload.message;
             const userId = action.payload.userId;
-            console.log(userId);
             const fromId = message.senderId === userId
                 ? message.recipientId
                 : message.senderId;
